@@ -60,7 +60,7 @@ behavior_system_template = """下面是当前的信息，请根据你的角色�
 {{episodic_memories}}
 
 【可选动作】
-{{actions}}"""
+{{action_data}}"""
 
 
 behavior_template = f"""
@@ -175,5 +175,12 @@ def behavior_task_format_inputs(inputs):
             inputs.get("active_goals", []), "description"
         ),
         "social_norms": default_extract_strings(inputs.get("social_norms", [])),
-        "actions": "无",
+        "action_data": default_extract_fields_to_string(
+            data_list=inputs.get("action_data", []),
+            field_configs=[
+                {"key": "id", "display": "ID", "default": "未知"},
+                {"key": "description", "display": "描述", "default": "未知"},
+            ],
+            list_name="无",
+        ),
     }

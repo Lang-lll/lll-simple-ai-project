@@ -76,7 +76,7 @@ class UnderstoodData(BaseModel):
     )
     action_categorys: List[str] = Field(
         default_factory=list,
-        description="根据当前情境需要执行的动作类型分类。从可选动作分类中选择",
+        description="根据当前情境可能需要执行的动作分类KEY。从可选动作分类中选择",
     )
     memory_query_plan: MemoryQueryPlan | None = Field(
         default=None, description="制定从长期记忆中查询相关信息的计划"
@@ -99,9 +99,7 @@ understand_system_template = """下面是当前的信息，请根据你的角色
 {{recent_events}}
 
 【可选动作分类】
-{{action_categories}}
-
-请简单总结需要你理解的多模态信息。"""
+{{action_categories}}"""
 
 
 understand_template = f"""
@@ -134,7 +132,7 @@ understand_output_json_template = PromptTemplate(
 
 - `importance_score`: 整数，范围0-100。当前事件的重要程度分数。
 
-- `action_categorys`: 数组，根据当前情境需要执行的动作类型分类。从可选动作分类中选择。
+- `action_categorys`: 数组，根据当前情境可能需要执行的动作分类KEY。从可选动作分类中选择。
 
 - `memory_query_plan`: 对象，包含记忆查询计划的详细信息。
 
@@ -202,6 +200,22 @@ def understand_task_format_inputs(inputs):
                     "display": "内容",
                     "default": "未知",
                     "processor": understood_data_get_main_content,
+                },
+            ],
+            list_name="无",
+        ),
+        "action_categories": default_extract_fields_to_string(
+            data_list=inputs.get("action_categories", []),
+            field_configs=[
+                {
+                    "key": "category_key",
+                    "display": "KEY",
+                    "default": "未知",
+                },
+                {
+                    "key": "description",
+                    "display": "描述",
+                    "default": "未知",
                 },
             ],
             list_name="无",

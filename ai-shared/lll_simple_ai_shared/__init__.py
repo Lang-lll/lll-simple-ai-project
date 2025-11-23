@@ -35,6 +35,12 @@ from .data_models.episodic_memories_models import (
     extract_memories_output_json_template,
     extract_memories_task_format_inputs,
 )
+from .data_models.action_models import (
+    ActionIndexModels,
+    ActionCategoryModels,
+    ActionDataModels,
+    ActionDataFrameModels,
+)
 from .utils.prompt_template import PromptTemplate
 from .utils.extract import (
     MODALITY_TYPES,
@@ -47,7 +53,7 @@ from .utils.extract import (
 from .utils.date import datetime_to_cn_format
 
 
-__version__ = "0.1.21"
+__version__ = "0.1.22"
 __all__ = [
     "MorningSituationModels",
     "UnderstoodData",
@@ -56,6 +62,10 @@ __all__ = [
     "BehaviorPlan",
     "EpisodicMemoriesGenerateModels",
     "EpisodicMemoriesModels",
+    "ActionIndexModels",
+    "ActionCategoryModels",
+    "ActionDataModels",
+    "ActionDataFrameModels",
     "PromptTemplate",
     "morning_situation_template",
     "morning_situation_system_template",
