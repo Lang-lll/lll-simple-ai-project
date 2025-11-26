@@ -53,7 +53,7 @@ from .utils.extract import (
 from .utils.date import datetime_to_cn_format
 
 
-__version__ = "0.1.22"
+__version__ = "0.1.23"
 __all__ = [
     "MorningSituationModels",
     "UnderstoodData",

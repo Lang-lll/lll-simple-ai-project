@@ -25,6 +25,7 @@ class TTSAction(BaseAction):
 class MotionAction(BaseAction):
     type: str = "motion"
     action_id: str = Field(..., description="动作ID，如 'walk_normal', 'happy_wave_01'")
+    action_category: str = Field(..., description="动作分类，如 'emotional'")
     intensity: float = Field(default=1.0, description="动作强度 0.0-1.0")
     speed: float = Field(default=1.0, description="动作速度 0.5-2.0")
 
@@ -90,6 +91,7 @@ behavior_output_json_template = PromptTemplate(
 
   ### 当 type = "motion" 时，包含：
   - `action_id`: 动作ID，从动作列表中选择
+  - `action_category`: 动作分类，动作ID对应的分类
   - `speed`: 数字0.5-2.0，动作速度，默认1.0
 
   ### 当 type = "wait" 时，包含：
@@ -179,6 +181,7 @@ def behavior_task_format_inputs(inputs):
             data_list=inputs.get("action_data", []),
             field_configs=[
                 {"key": "id", "display": "ID", "default": "未知"},
+                {"key": "category_key", "display": "分类", "default": "未知"},
                 {"key": "description", "display": "描述", "default": "未知"},
             ],
             list_name="无",

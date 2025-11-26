@@ -62,6 +62,7 @@ class UnderstoodData(BaseModel):
         default="low",
         description="根据安全性、紧急性判断响应紧急程度: low(低)、medium(中)、high(高)、critical(极高)",
     )
+    # TODO: 不要总结
     main_content: str = Field(..., description="用一句话清晰概括当前信息的核心内容")
     current_situation: str | None = Field(
         ...,

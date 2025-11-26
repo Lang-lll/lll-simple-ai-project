@@ -9,6 +9,7 @@ class ActionIndexModels(BaseModel):
 
 class ActionCategoryModels(BaseModel):
     id: str = Field(..., description="动作ID")
+    category_key: str = Field(..., description="动作分类")
     description: str = Field(..., description="描述")
 
 
