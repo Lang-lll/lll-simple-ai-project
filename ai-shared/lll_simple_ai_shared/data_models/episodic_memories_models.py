@@ -2,7 +2,14 @@ from pydantic import BaseModel, Field
 from typing import List
 from datetime import datetime
 from ..utils.prompt_template import PromptTemplate
-from ..utils.extract import MODALITY_TYPES, default_extract_strings
+from ..utils.extract import (
+    MODALITY_TYPES,
+    default_extract_strings,
+    default_extract_fields_to_string,
+    modality_type_to_name,
+    event_entity_to_name,
+    understood_data_get_main_content,
+)
 
 
 class EpisodicMemoriesGenerateModels(BaseModel):
@@ -11,7 +18,7 @@ class EpisodicMemoriesGenerateModels(BaseModel):
         description="唯一标识符",
     )
     content: str = Field(
-        ...,
+        default="",
         description="用一句话清晰概括记忆的核心内容，要简洁具体",
     )
     importance: int = Field(default=0, description="当前记忆的重要程度分数(0-100)")
@@ -31,12 +38,14 @@ class EpisodicMemoriesModels(EpisodicMemoriesGenerateModels):
     source: str
 
 
+# TODO: 保持顺序
 extract_memories_system_template = """请你对原始的历史记忆进行**提炼、概括和结构化**，生成清晰易用的记忆条目。
 
 ## 重要规则
 1. **ID保持不变**：你必须原样使用每个记忆条目中提供的id，绝对不能修改或生成新的id
 2. **内容可以优化**：你可以重新组织语言让content更清晰，但不能改变原意
-3. **可以筛选和合并**：你可以舍弃不重要的记忆，或将多个相关记忆合并为一个
+3. **可以合并**：你可以将多个相关记忆合并为一个
+4. **可以舍弃**：你可以舍弃不重要的记忆
 
 ## 合并记忆时的ID处理
 - 如果合并多个记忆，保留最重要的那个记忆的id
@@ -92,74 +101,33 @@ extract_memories_output_json_template = PromptTemplate(
 
 
 def extract_memories_task_format_inputs(inputs):
-    def safe_event_to_string(event):
-        try:
-            # 获取event_id
-            event_id = event.get("event_id", None)
-            if event_id is None:
-                return None
-            event_id = event_id.strip()
-
-            modality_type = event.get("modality_type", None)
-            if modality_type is None:
-                modality_type = "未知"
-            else:
-                modality_type = MODALITY_TYPES.get(modality_type, "未知")
-
-            # 检查understood_data
-            understood_data = event.get("understood_data", None)
-            if understood_data is None:
-                return None
-
-            # 获取event_entity
-            event_entity = understood_data.get("event_entity", None)
-            if (
-                event_entity is None
-                or not isinstance(event_entity, str)
-                or not event_entity.strip()
-            ):
-                event_entity = "未知"
-            else:
-                event_entity = event_entity.strip()
-
-            # 获取main_content
-            main_content = understood_data.get("main_content", None)
-            if (
-                main_content is None
-                or not isinstance(main_content, str)
-                or not main_content.strip()
-            ):
-                main_content = "未知"
-            else:
-                main_content = main_content.strip()
-
-            return f"ID: {event_id} | 类型: {modality_type} | 角色: {event_entity} | 内容: {main_content}"
-
-        except Exception as e:
-            print(e)
-            return None
-
-    def extract_events_string(recent_events):
-        if recent_events is None:
-            return "无"
-        if not recent_events:
-            return "无"
-
-        valid_strings = []
-        for event in recent_events:
-            # 跳过None事件
-            if event is None:
-                continue
-
-            event_str = safe_event_to_string(event)
-            if event_str:
-                valid_strings.append(event_str)
-
-        return "- " + "\n- ".join(valid_strings) if valid_strings else "无"
-
     return {
         "current_situation": inputs.get("current_situation", "未知"),
-        "recent_events": extract_events_string(inputs.get("recent_events", [])),
+        "recent_events": default_extract_fields_to_string(
+            data_list=inputs.get("recent_events", []),
+            field_configs=[
+                {"key": "event_id", "display": "ID", "default": "未知"},
+                {
+                    "key": "modality_type",
+                    "display": "类型",
+                    "default": "未知",
+                    "processor": modality_type_to_name,
+                },
+                {
+                    "key": "understood_data",
+                    "display": "来源",
+                    "default": "未知",
+                    "processor": event_entity_to_name,
+                },
+                {
+                    "key": "understood_data",
+                    "display": "内容",
+                    "default": "未知",
+                    "processor": understood_data_get_main_content,
+                },
+            ],
+            list_name="无",
+        ),
         "active_goals": default_extract_strings(
             inputs.get("active_goals", []), "description"
         ),
