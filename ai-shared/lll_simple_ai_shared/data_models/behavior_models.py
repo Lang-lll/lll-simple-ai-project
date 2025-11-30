@@ -37,6 +37,7 @@ class WaitAction(BaseAction):
 
 
 class BehaviorPlan(BaseModel):
+    # TODO: 不一定需要wait
     plan: List[Union[TTSAction, MotionAction, WaitAction]] = Field(
         default_factory=list, description="行为计划序列"
     )

@@ -22,6 +22,8 @@ from .data_models.recall_results_models import (
 )
 from .data_models.behavior_models import (
     BehaviorPlan,
+    TTSAction,
+    MotionAction,
     behavior_template,
     behavior_system_template,
     behavior_output_json_template,
@@ -53,13 +55,15 @@ from .utils.extract import (
 from .utils.date import datetime_to_cn_format
 
 
-__version__ = "0.1.23"
+__version__ = "0.1.24"
 __all__ = [
     "MorningSituationModels",
     "UnderstoodData",
     "MemoryQueryPlan",
     "RecallResultsModels",
     "BehaviorPlan",
+    "TTSAction",
+    "MotionAction",
     "EpisodicMemoriesGenerateModels",
     "EpisodicMemoriesModels",
     "ActionIndexModels",

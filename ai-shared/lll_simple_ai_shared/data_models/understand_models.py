@@ -10,6 +10,7 @@ from ..utils.extract import (
 )
 
 
+# TODO: 简化信息
 class MemoryQueryPlan(BaseModel):
     query_type: Literal["none", "long_term_cached", "long_term_fresh"] = Field(
         default="none",
@@ -21,6 +22,7 @@ class MemoryQueryPlan(BaseModel):
 """,
     )
 
+    # TODO: 错误使用keyword
     query_strategy: Literal["semantic", "keyword"] = Field(
         default="semantic",
         description="""
@@ -62,8 +64,10 @@ class UnderstoodData(BaseModel):
         default="low",
         description="根据安全性、紧急性判断响应紧急程度: low(低)、medium(中)、high(高)、critical(极高)",
     )
-    # TODO: 不要总结
-    main_content: str = Field(..., description="用一句话清晰概括当前信息的核心内容")
+    main_content: str = Field(
+        ...,
+        description="用一句话清晰概括当前信息的核心内容，必须包含具体时间等关键细节，确保不遗漏重要信息。如果是语音或者文本，尽量保持原来的语法",
+    )
     current_situation: str | None = Field(
         ...,
         description="综合当前信息与历史上下文，生成对整体情境的连贯理解。形成完整的情境认知",
@@ -84,11 +88,12 @@ class UnderstoodData(BaseModel):
     )
 
 
+# TODO: 突出understand_event
 understand_system_template = """下面是当前的信息，请根据你的角色将杂乱的多模态信息整理成一条结构化的“工作记忆”：
 
 你可能会收到来自以下来源的原始信息：
-- [asr]： 自动语音识别文本，可能包含错误或歧义。
-- [text]： 文本信息，但可能有错别字。
+- [`asr`]： 自动语音识别文本，可能包含错误或歧义。
+- [`text`]： 文本信息，但可能有错别字。
 
 【需要你理解的信息】
 [{{understand_event_type}}]{{understand_event}}
@@ -123,7 +128,7 @@ understand_output_json_template = PromptTemplate(
   - `"high"`: 高优先级
   - `"critical"`: 极高优先级
 
-- `main_content`: 字符串。用**一句话**清晰概括当前信息的核心内容。
+- `main_content`: 字符串。用一句话清晰概括当前信息的核心内容，必须包含具体时间等关键细节，确保不遗漏重要信息。如果是语音或者文本，尽量保持原来的语法。
 
 - `current_situation`: 字符串。综合当前信息与历史上下文，生成对整体情境的连贯理解，形成完整的情境认知。
 

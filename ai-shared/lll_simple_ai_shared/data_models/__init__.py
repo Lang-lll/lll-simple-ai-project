@@ -22,6 +22,8 @@ from .recall_results_models import (
 )
 from .behavior_models import (
     BehaviorPlan,
+    TTSAction,
+    MotionAction,
     behavior_template,
     behavior_system_template,
     behavior_output_json_template,
@@ -50,6 +52,8 @@ __all__ = [
     "MemoryQueryPlan",
     "RecallResultsModels",
     "BehaviorPlan",
+    "TTSAction",
+    "MotionAction",
     "EpisodicMemoriesGenerateModels",
     "EpisodicMemoriesModels",
     "ActionIndexModels",
