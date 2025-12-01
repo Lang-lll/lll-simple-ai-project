@@ -60,10 +60,11 @@ class MemoryQueryPlan(BaseModel):
 
 
 class UnderstoodData(BaseModel):
-    response_priority: Literal["low", "medium", "high", "critical"] = Field(
+    """response_priority: Literal["low", "medium", "high", "critical"] = Field(
         default="low",
         description="根据安全性、紧急性判断响应紧急程度: low(低)、medium(中)、high(高)、critical(极高)",
-    )
+    )"""
+
     main_content: str = Field(
         ...,
         description="用一句话清晰概括当前信息的核心内容，必须包含具体时间等关键细节，确保不遗漏重要信息。如果是语音或者文本，尽量保持原来的语法",
@@ -76,9 +77,9 @@ class UnderstoodData(BaseModel):
     key_entities: List[str] = Field(
         default_factory=list, description="从信息中提取的重要名词或实体"
     )
-    importance_score: int = Field(
+    """importance_score: int = Field(
         default=0, description="当前事件的重要程度分数(0-100)"
-    )
+    )"""
     action_categorys: List[str] = Field(
         default_factory=list,
         description="根据当前情境可能需要执行的动作分类KEY。从可选动作分类中选择",
@@ -88,14 +89,13 @@ class UnderstoodData(BaseModel):
     )
 
 
-# TODO: 突出understand_event
-understand_system_template = """下面是当前的信息，请根据你的角色将杂乱的多模态信息整理成一条结构化的“工作记忆”：
+understand_system_template = """请你根据下面的信息，生成结构化的"工作记忆"。
 
 你可能会收到来自以下来源的原始信息：
 - [`asr`]： 自动语音识别文本，可能包含错误或歧义。
 - [`text`]： 文本信息，但可能有错别字。
 
-【需要你理解的信息】
+【需要你理解的信息】(这是最重要的当前信息)
 [{{understand_event_type}}]{{understand_event}}
 
 【当前情境】
@@ -122,12 +122,6 @@ understand_output_json_template = PromptTemplate(
 你必须输出一个JSON对象，包含以下字段：
 
 ## 一级字段说明：
-- `response_priority`: 字符串，枚举类型。根据安全性、紧急性判断响应紧急程度，必须是：
-  - `"low"`: 低优先级
-  - `"medium"`: 中优先级
-  - `"high"`: 高优先级
-  - `"critical"`: 极高优先级
-
 - `main_content`: 字符串。用一句话清晰概括当前信息的核心内容，必须包含具体时间等关键细节，确保不遗漏重要信息。如果是语音或者文本，尽量保持原来的语法。
 
 - `current_situation`: 字符串。综合当前信息与历史上下文，生成对整体情境的连贯理解，形成完整的情境认知。
@@ -135,8 +129,6 @@ understand_output_json_template = PromptTemplate(
 - `event_entity`: 字符串。触发事件的主体（谁或什么触发了这个事件）。
 
 - `key_entities`: 数组，包含字符串。从信息中提取的重要名词或实体。
-
-- `importance_score`: 整数，范围0-100。当前事件的重要程度分数。
 
 - `action_categorys`: 数组，根据当前情境可能需要执行的动作分类KEY。从可选动作分类中选择。
 
@@ -163,12 +155,10 @@ understand_output_json_template = PromptTemplate(
 {examples}""",
     variables={
         "examples": """{
-  "response_priority": "medium", 
   "main_content": "用户要求打开客厅的灯光",
   "current_situation": "用户在晚上进入客厅后发出了开灯指令，表明需要照明",
   "event_entity": "用户",
   "key_entities": ["客厅", "灯光", "用户"],
-  "importance_score": 30,
   "action_categorys: ["locomotion", "gestures"],
   "memory_query_plan": {
     "query_type": "long_term_fresh",

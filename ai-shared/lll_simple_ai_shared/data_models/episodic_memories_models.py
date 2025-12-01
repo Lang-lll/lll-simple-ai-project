@@ -38,7 +38,6 @@ class EpisodicMemoriesModels(EpisodicMemoriesGenerateModels):
     source: str
 
 
-# TODO: 保持顺序
 extract_memories_system_template = """请你对原始的历史记忆进行**提炼、概括和结构化**，生成清晰易用的记忆条目。
 
 ## 重要规则
